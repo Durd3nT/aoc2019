@@ -50,7 +50,7 @@ void findInput(const std::vector<int> & initCode,
 
 // ----- MAIN -----
 int main() {
-    std::ifstream inFile("input.txt");
+    std::ifstream inFile("in02.txt");
 
     std::vector<int> initCode;
     std::string val;

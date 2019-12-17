@@ -202,7 +202,7 @@ int findClosestIntersection(const std::vector<int> & inter) {
 // ----- MAIN -----
 // ################
 int main() {
-    std::string data_path = "./input.txt";
+    std::string data_path = "./in03.txt";
 
     std::vector<char> direction;
     std::vector<int> distance, edgeCount;
