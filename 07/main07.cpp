@@ -38,11 +38,12 @@ void ampSeries(std::vector<int> & initCode) {
 
     do {
         int out = 0;
-
             for (size_t i = 0; i < phase.size(); i++) {
-                std::cout << " ---- AMP " << i << " ---- \n";
+                // std::cout << " ---- AMP " << i << " ---- \n";
+                intCode IC(initCode, out);
+
                 oFile.open("outIntCode.txt");
-                oFile << phase[i] << "\n" << out;
+                oFile << phase[i] << "\n" << IC.getOutput();
                 oFile.close();
 
                 // redirect cin to file to read from that file at run time
@@ -50,7 +51,8 @@ void ampSeries(std::vector<int> & initCode) {
                 // save old buf (standard input) and redirect to inout buffer
                 auto cinbuf = std::cin.rdbuf(inout.rdbuf());
 
-                runIntCode(initCode, out);
+                IC.runIntCode();
+                out = IC.getOutput();
 
                 inout.close();
             }
