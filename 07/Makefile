@@ -10,6 +10,6 @@ run: main07.exe
 	./main07.exe
 
 clean:
-	rm -v *.exe out*.txt
+	rm -v *.exe
 
 .PHONY: run clean

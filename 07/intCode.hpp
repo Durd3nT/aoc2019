@@ -15,6 +15,9 @@ class intCode {
         std::vector<int> code_;
         std::vector<int> paraMode_;
         int lastOut_;
+        bool stopAtOutput_;
+        int input_;
+        size_t inputCount_;
 
         // Private Member
         void getParameterMode();
@@ -30,10 +33,15 @@ class intCode {
 
     public:
         // Ctor
-        intCode(std::vector<int> code, int in, size_t pos = 0) {
+        intCode(std::vector<int> code, int in, bool stopAtOutput = false,
+                size_t pos = 0)
+        {
             code_ = code;
             lastOut_ = in;
+            stopAtOutput_ = stopAtOutput;
             pos_ = pos;
+            input_ = 0;
+            inputCount_ = 0;
         }
 
         // Getters
@@ -42,7 +50,7 @@ class intCode {
         int getOutput() { return lastOut_; }
 
         // Public Member
-        void runIntCode();
+        bool runIntCode(const std::vector<int> &);
 };
 
 
@@ -83,14 +91,10 @@ void intCode::modify2()
 
 void intCode::modify3()
 {
-    int input = 0;
     std::vector<int *> params(1);
     setParaMode(params);
 
-    std::cin >> input;
-    *params[0] = input;
-
-    // std::cout << "Input: " << input << "\n";
+    *params[0] = input_;
 }
 
 
@@ -99,7 +103,6 @@ void intCode::modify4()
     std::vector<int *> params(1);
     setParaMode(params);
 
-    // std::cout << "Output: " << *params[0] << "\n";
     lastOut_ = *params[0];
 }
 
@@ -169,13 +172,14 @@ void intCode::getParameterMode() {
 }
 
 
-void intCode::runIntCode() {
+bool intCode::runIntCode(const std::vector<int> & in) {
     // out must be passed by referenc in order to write out without exiting
     // runIntCode().
     // start gives starting position in int code (default = 0).
+    // return true IFF program was halted (opcode 99), false otherwise
     // -----------------
 
-    size_t step = 4;
+    size_t step = 0;
 
     while (pos_ < code_.size()) {
         getParameterMode();
@@ -198,9 +202,22 @@ void intCode::runIntCode() {
         } else if (opcode == 2) {
             modify2();
         } else if (opcode == 3) {
+            inputCount_++;
+            if (inputCount_ <= in.size()) {
+                input_ = in[inputCount_-1];
+            } else {
+                std::cout << " Too few input arguments provided, type ";
+                std::cout << "Input here: ";
+                std::cin >> input_;
+            }
             modify3();
         } else if (opcode == 4) {
             modify4();
+            if (stopAtOutput_) {
+                inputCount_ = 0;
+                pos_ += step;
+                return false;
+            }
         } else if (opcode == 5) {
             modify5();
         } else if (opcode == 6) {
@@ -210,16 +227,18 @@ void intCode::runIntCode() {
         } else if (opcode == 8) {
             modify8();
         } else if (opcode == 99) {
-            // std::cout << " --- PROGRAM HALTED (op 99) --- \n";
-            break;
+            return true; // program came to an end
         }
         else {
             std::cout << "ERROR: something went wrong - opcode = " << opcode;
             std::cout << "(must be in (1, 2, ..., 8, 99))\n";
+            return false;
         }
 
         if (opcode != 5 && opcode != 6) { pos_ += step; }
-    }
+    } // WHILE pos_ < code_.size()
+
+    return false;
 }
 
 

@@ -24,38 +24,23 @@ void ampSeries(std::vector<int> & initCode) {
     // the last amplifier.
     // -------------------
 
-    // create output file for amplifier signals (int code output)
-    std::ofstream oFile;
-    oFile.open("outIntCode.txt");
-    oFile << 0 << "\n" << 0;
-    oFile.close();
-
-    std::vector<int> phase{0,1,2,3,4}; // or with std::iota
+    std::vector<int> phase{0,1,2,3,4};
     int maxOut = 0;
     std::vector<int> maxPhase;
 
-    std::ifstream inout;
-
     do {
+        std::vector<int> input(2);
         int out = 0;
-            for (size_t i = 0; i < phase.size(); i++) {
-                // std::cout << " ---- AMP " << i << " ---- \n";
-                intCode IC(initCode, out);
 
-                oFile.open("outIntCode.txt");
-                oFile << phase[i] << "\n" << IC.getOutput();
-                oFile.close();
+        for (size_t i = 0; i < phase.size(); i++) {
+            intCode IC(initCode, out);
 
-                // redirect cin to file to read from that file at run time
-                inout.open("outIntCode.txt");
-                // save old buf (standard input) and redirect to inout buffer
-                auto cinbuf = std::cin.rdbuf(inout.rdbuf());
+            input[0] = phase[i];
+            input[1] = out;
 
-                IC.runIntCode();
-                out = IC.getOutput();
-
-                inout.close();
-            }
+            IC.runIntCode(input);
+            out = IC.getOutput();
+        }
 
         if (out > maxOut) {
             maxOut = out;
@@ -65,12 +50,64 @@ void ampSeries(std::vector<int> & initCode) {
 
 
     std::cout << " -- -- -- -- -- -- -- -- -- -- -- -- -- \n";
+    std::cout << " --- AMPLIFIER SERIES --- \n";
     std::cout << "Max output: " << maxOut << " with phase ";
     for (auto & i: maxPhase)
         std::cout << i;
     std::cout << "\n";
 }
 
+
+void ampFeedbackLoop(std::vector<int> & initCode) {
+    std::vector<int> phase{5,6,7,8,9};
+    int maxOut = 0;
+    std::vector<int> maxPhase;
+
+    do {
+        std::vector<intCode> amps;
+        bool halted = false;
+
+        std::vector<int> input(2);
+        int out = 0;
+
+        // initialize amplifiers until first output
+        // after first run of for loop, out is output of amp 5, input for amp 1
+        for (size_t i = 0; i < phase.size(); i++) {
+            intCode IC(initCode, out, true);
+
+            input[0] = phase[i];
+            input[1] = out;
+
+            halted = IC.runIntCode(input);
+            out = IC.getOutput();
+
+            amps.push_back(IC); // push_back() copies, so no scope issues
+        }
+
+        input.resize(1);
+
+        while (!halted) {
+            for (size_t i = 0; i < amps.size(); i++) {
+                input[0] = out;
+                halted = amps[i].runIntCode(input);
+                out = amps[i].getOutput();
+            }
+        }
+
+        if (out > maxOut) {
+            maxOut = out;
+            maxPhase = phase;
+        }
+    } while (std::next_permutation(phase.begin(), phase.end()));
+
+
+    std::cout << " -- -- -- -- -- -- -- -- -- -- -- -- -- \n";
+    std::cout << " --- AMPLIFIER FEEDBACK LOOP --- \n";
+    std::cout << "Max output: " << maxOut << " with phase ";
+    for (auto & i: maxPhase)
+        std::cout << i;
+    std::cout << "\n";
+}
 
 
 
@@ -82,5 +119,7 @@ int main() {
     readData(data_path, initCode);
 
     ampSeries(initCode);
+
+    ampFeedbackLoop(initCode);
 
 }
