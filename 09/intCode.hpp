@@ -35,6 +35,7 @@ class intCode {
             inputCount_ = 0;
             relBase_ = 0;
         }
+        ~intCode() = default;
 
         // Getters
         size_t getPosition() { return pos_; }
