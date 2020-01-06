@@ -230,11 +230,10 @@ int main() {
               << coords[station][1] << ") with " << astCount[station]
               << " asteroids in sight\n";
 
+
     std::cout << "\n - - - PART 2 - - - \n";
 
-
     std::vector<size_t> vapIdx(coords.size());
-
     vaporizeAsts(coords, station, vapIdx);
 
     std::cout << "Asteroid " << 200 << " vaporized at "
