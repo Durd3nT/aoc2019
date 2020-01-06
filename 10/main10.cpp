@@ -241,6 +241,4 @@ int main() {
     << coords[vapIdx[199]][0] << "," << coords[vapIdx[199]][1] << "\t-  ";
     std::cout << "100*X + Y = "
     << coords[vapIdx[199]][0]*100+coords[vapIdx[199]][1] << "\n";
-
-
 }
