@@ -23,8 +23,7 @@ void loadData(const std::string & data_path,
         int x = 0;
         while(x < line.size()) {
             if (line[x] == '#') {
-                std::vector<int> coordPair{x,y};
-                data.push_back(coordPair);
+                data.push_back(std::vector<int>{x,y});
             }
             x++;
         }
@@ -86,7 +85,8 @@ bool sightBlocked(const std::vector<std::vector<T>> & coords,
 }
 
 
-void getAstsInSight(const std::vector<std::vector<int>> & coords,
+template<typename T>
+void getAstsInSight(const std::vector<std::vector<T>> & coords,
                     std::vector<int> & astCount)
 {
     assert(astCount.size() == coords.size());
@@ -114,7 +114,8 @@ size_t getMaxAsts(const std::vector<int> & astCount) {
 // ##############
 // --- PART 2 ---
 // ##############
-void cartToPolar(const std::vector<std::vector<int>> & coords,
+template<typename T>
+void cartToPolar(const std::vector<std::vector<T>> & coords,
                  const size_t station,
                  std::vector<std::vector<double>> & coordsPol)
 {
@@ -139,7 +140,8 @@ void cartToPolar(const std::vector<std::vector<int>> & coords,
 }
 
 
-void vaporizeAsts(const std::vector<std::vector<int>> & coords,
+template<typename T>
+void vaporizeAsts(const std::vector<std::vector<T>> & coords,
                   const size_t station, std::vector<size_t> & vapIdx)
 {
     int N = coords.size();
@@ -161,9 +163,6 @@ void vaporizeAsts(const std::vector<std::vector<int>> & coords,
                   return coordsPol[i1][0] < coordsPol[i2][0];
               });
 
-    // erase station itself from index list
-    idx.erase(idx.begin());
-
     // sort vector idx such that coordsPol[idx[i]][1] gives increasing order of
     // radii r WITHIN series of equal azimuthal angles phi (coordsPol[idx[i]][0])
     size_t ir = 0;
@@ -182,6 +181,10 @@ void vaporizeAsts(const std::vector<std::vector<int>> & coords,
         ir++;
     }
 
+    // erase station itself from index list
+    idx.erase(idx.begin());
+
+
     // vaporize all asteroids (N-1 without station)
     while (vapCount < N-1) {
         // remove from vector idx all vaporized asteroids
@@ -190,6 +193,9 @@ void vaporizeAsts(const std::vector<std::vector<int>> & coords,
                                  { return vaporized[i]; }),
                   idx.end());
 
+        // after erasing all vaporized asteroids from idx vector, idx[0] is
+        // always asteroid at first angle, closest to station(smallest radius),
+        // due to sorting of idx vector
         if (idx.size() > 0) {
             vapIdx[vapCount] = idx[0];
             vaporized[idx[0]] = true;
