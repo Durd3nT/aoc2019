@@ -6,12 +6,24 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <type_traits>
+#include <cassert>
 
 
-// Type Traits
-// template<typename T> struct intCode_type<T> { typedef T type; }
-// template<> struct intCode_type<int> { typedef int type; }
+const int ADD = 1;
+const int MULTIPLY = 2;
+const int INPUT = 3;
+const int OUTPUT = 4;
+const int JUMPTRUE = 5;
+const int JUMPFALSE = 6;
+const int LESS = 7;
+const int EQUAL = 8;
+const int ADJUSTBASE = 9;
+const int HALT = 99;
+
+const int POSITION = 0;
+const int IMMEDIATE = 1;
+const int RELATIVE = 2;
+
 
 
 template<typename T>
@@ -75,21 +87,34 @@ template<typename T>
 void intCode<T>::setParaMode(std::vector<T *> & params)
 {
     // set pointers to integers depending on parameter mode
-    // 0 - position mode
-    //     (parameter interpreted as position of value)
-    // 1 - immediate mode
-    //     (parameter interpreted as value)
-    // 2 - relative mode
-    //     (parameter is interpreted as position, value is at
-    //     position + relative base)
+    // - position mode (0)
+    //   (parameter interpreted as position of value)
+    // - immediate mode (1)
+    //   (parameter interpreted as value)
+    // - relative mode (2)
+    //   (parameter is interpreted as position, value is at
+    //   position + relative base)
+
+    assert(paraMode_.size() == params.size()+1);
+    assert(pos_+1+params.size() > 0 ||
+        *(code_.begin() + pos_+1+params.size()) > 0 ||
+        *(code_.begin() + pos_+1+params.size()) + relBase_ > 0);
+
+    while (pos_+1+params.size() > code_.size() ||
+           unsigned(*(code_.begin() + pos_+1+params.size())) > code_.size() ||
+           unsigned(*(code_.begin() + pos_+1+params.size()) + relBase_) > code_.size())
+    {
+        code_.push_back(0);
+    }
 
     for (size_t i = 0; i < params.size(); i++) {
-        if (*(paraMode_.begin()+1+i) == 0) { // position mode
+        if (*(paraMode_.begin()+1+i) == POSITION) {
             params[i] = &( *(code_.begin() + *(code_.begin() + pos_+1+i) ) );
-        } else if (*(paraMode_.begin()+1+i) == 1) { // immediate mode
+        } else if (*(paraMode_.begin()+1+i) == IMMEDIATE) {
             params[i] = &( *(code_.begin() + pos_+1+i) );
-        } else if (*(paraMode_.begin()+1+i) == 2) { // relative mode
-            params[i] = &( *(code_.begin() + *(code_.begin() + pos_+1+i) + relBase_) );
+        } else if (*(paraMode_.begin()+1+i) == RELATIVE) {
+            params[i] = &( *(code_.begin() + *(code_.begin() + pos_+1+i)
+                                           + relBase_) );
         }
     }
 }
@@ -100,6 +125,7 @@ void intCode<T>::modify1()
 {
     std::vector<T *> params(3);
     setParaMode(params);
+
 
     *params[2] = (*params[0]) + (*params[1]);
 }
@@ -202,6 +228,7 @@ void intCode<T>::getParameterMode() {
 
     std::string xs = std::to_string(code_[pos_]);
     if (xs.size() > 2) {
+        // opcode are LAST 2 digits of instruction
         std::string ops = xs.substr(xs.size()-2);
         paraMode_.push_back(std::stoi(ops));
 
@@ -222,28 +249,28 @@ bool intCode<T>::runIntCode(const std::vector<T> & in) {
     // -----------------
 
     size_t step = 0;
+    int opcode = 0;
 
-    while (pos_ < code_.size()) {
+    while (opcode != HALT) {
         getParameterMode();
-        int opcode = paraMode_[0];
+        opcode = paraMode_[0];
 
         if (opcode == 1 || opcode == 2 || opcode == 7 || opcode == 8) {
             step = 4;
-            paraMode_.resize(step);
         } else if (opcode == 3 || opcode == 4 || opcode == 9) {
             step = 2;
-            paraMode_.resize(step);
         } else if (opcode == 5 || opcode == 6) {
             step = 3;
-            paraMode_.resize(step);
         }
 
+        // fill all remaining parameter modes with 0
+        paraMode_.resize(step);
 
-        if (opcode == 1) { // ALTERNATIVE: Expression templates
+        if (opcode == ADD) { // ALTERNATIVE: Expression templates
             modify1();
-        } else if (opcode == 2) {
+        } else if (opcode == MULTIPLY) {
             modify2();
-        } else if (opcode == 3) {
+        } else if (opcode == INPUT) {
             inputCount_++;
             if (inputCount_ <= in.size()) {
                 input_ = in[inputCount_-1];
@@ -253,7 +280,7 @@ bool intCode<T>::runIntCode(const std::vector<T> & in) {
                 std::cin >> input_;
             }
             modify3();
-        } else if (opcode == 4) {
+        } else if (opcode == OUTPUT) {
             modify4();
             std::cout << lastOut_ << "\n";
             if (stopAtOutput_) {
@@ -261,20 +288,17 @@ bool intCode<T>::runIntCode(const std::vector<T> & in) {
                 pos_ += step;
                 return false;
             }
-        } else if (opcode == 5) {
+        } else if (opcode == JUMPTRUE) {
             modify5();
-        } else if (opcode == 6) {
+        } else if (opcode == JUMPFALSE) {
             modify6();
-        } else if (opcode == 7) {
+        } else if (opcode == LESS) {
             modify7();
-        } else if (opcode == 8) {
+        } else if (opcode == EQUAL) {
             modify8();
-        } else if (opcode == 9) {
+        } else if (opcode == ADJUSTBASE) {
             modify9();
-        } else if (opcode == 99) {
-            return true; // program came to an end
-        }
-        else {
+        } else if (opcode > 9 && opcode != 99) {
             std::cout << "ERROR: something went wrong - opcode = " << opcode;
             std::cout << "(must be in (1, 2, ..., 8, 99))\n";
             return false;
@@ -283,7 +307,7 @@ bool intCode<T>::runIntCode(const std::vector<T> & in) {
         if (opcode != 5 && opcode != 6) { pos_ += step; }
     } // WHILE pos_ < code_.size()
 
-    return false;
+    return true;
 }
 
 
