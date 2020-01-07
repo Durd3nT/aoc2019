@@ -33,7 +33,7 @@ void ampSeries(std::vector<int> & initCode) {
         int out = 0;
 
         for (size_t i = 0; i < phase.size(); i++) {
-            intCode IC(initCode, out);
+            intCode<int> IC(initCode);
 
             input[0] = phase[i];
             input[1] = out;
@@ -64,7 +64,7 @@ void ampFeedbackLoop(std::vector<int> & initCode) {
     std::vector<int> maxPhase;
 
     do {
-        std::vector<intCode> amps;
+        std::vector<intCode<int>> amps;
         bool halted = false;
 
         std::vector<int> input(2);
@@ -73,7 +73,7 @@ void ampFeedbackLoop(std::vector<int> & initCode) {
         // initialize amplifiers until first output
         // after first run of for loop, out is output of amp 5, input for amp 1
         for (size_t i = 0; i < phase.size(); i++) {
-            intCode IC(initCode, out, true);
+            intCode<int> IC(initCode, true);
 
             input[0] = phase[i];
             input[1] = out;

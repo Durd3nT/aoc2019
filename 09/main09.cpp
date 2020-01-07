@@ -30,11 +30,14 @@ int main() {
 
     readData(data_path, initCode);
 
+    bool stopAtOutput = false;
+    bool printOutput = true;
+
     {
         std::cout << "\n - - - PART 1 - - - \n";
 
         std::vector<long> input{1};
-        intCode<long> IC(initCode);
+        intCode<long> IC(initCode, stopAtOutput, printOutput);
         IC.runIntCode(input);
     }
 
@@ -42,7 +45,7 @@ int main() {
         std::cout << "\n - - - PART 2 - - - \n";
 
         std::vector<long> input{2};
-        intCode<long> IC(initCode);
+        intCode<long> IC(initCode, stopAtOutput, printOutput);
         IC.runIntCode(input);
     }
 }

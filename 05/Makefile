@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS += -std=c++14
 CXXFLAGS += -Wall -Wextra -Wpedantic
 
-main05.exe: main05.cpp
+main05.exe: main05.cpp intCode.hpp
 	$(CXX) $(CXXFLAGS) $< -o $@
 
 run: main05.exe

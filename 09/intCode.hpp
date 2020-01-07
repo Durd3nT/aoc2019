@@ -37,11 +37,12 @@ class intCode {
 
         // Ctor
         intCode(std::vector<T> code, bool stopAtOutput = false,
-                size_t pos = 0)
+                bool printOutput = false,size_t pos = 0)
         {
             code_ = code;
             lastOut_ = 0;
             stopAtOutput_ = stopAtOutput;
+            printOutput_ = printOutput;
             pos_ = pos;
             input_ = 0;
             inputCount_ = 0;
@@ -66,6 +67,7 @@ class intCode {
         std::vector<T> code_;
         std::vector<int> paraMode_;
         bool stopAtOutput_;
+        bool printOutput_;
 
         // Private Member
         void getParameterMode();
@@ -282,7 +284,9 @@ bool intCode<T>::runIntCode(const std::vector<T> & in) {
             modify3();
         } else if (opcode == OUTPUT) {
             modify4();
-            std::cout << lastOut_ << "\n";
+            if (printOutput_) {
+                std::cout << lastOut_ << "\n";
+            }
             if (stopAtOutput_) {
                 inputCount_ = 0;
                 pos_ += step;
