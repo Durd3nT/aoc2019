@@ -11,7 +11,11 @@ void readData(const std::string & data_path, std::vector<T> & data) {
     std::string val;
     if (inFile.is_open()) {
         while (getline(inFile, val, ',')) {
-            data.push_back(std::stoi(val));
+            if (std::is_same<T, int>::value) {
+                data.push_back(std::stoi(val));
+            } else if (std::is_same<T, long>::value) {
+                data.push_back(std::stol(val));
+            }
         }
         inFile.close();
     }
