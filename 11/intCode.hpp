@@ -162,11 +162,13 @@ bool intCode<T>::runIntCode(const std::vector<T> & in) {
     size_t step = 0;
     int opcode = 0;
 
-    if (stopAtInput_ || stopAtOutput_) {
+    if (stopAtInput_) {
+        lastOut_.resize(0);
+        inputCount_ = 0;
+    } else if (stopAtOutput_) {
         inputCount_ = 0;
     }
 
-    lastOut_.resize(0);
 
     while (opcode != HALT) {
         getParameterMode();
@@ -209,6 +211,11 @@ bool intCode<T>::runIntCode(const std::vector<T> & in) {
                 std::cout << "input: " << input_ << "\n";
             }
         } else if (opcode == OUTPUT) {
+            // if stopAtOutput_ only resize lastOut_ if another output
+            // instruction is issued. otherwise, it will be resized at last call
+            // of runIntCode before HALT, erasing the last output.
+            if (stopAtOutput_) { lastOut_.resize(0); }
+
             modify4();
 
             if (printInOut_) {
