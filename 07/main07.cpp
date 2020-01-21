@@ -30,20 +30,20 @@ void ampSeries(std::vector<int> & initCode) {
 
     do {
         std::vector<int> input(2);
-        int out = 0;
+        std::vector<int> out{0};
 
         for (size_t i = 0; i < phase.size(); i++) {
             intCode<int> IC(initCode);
 
             input[0] = phase[i];
-            input[1] = out;
+            input[1] = out[0];
 
             IC.runIntCode(input);
             out = IC.getOutput();
         }
 
-        if (out > maxOut) {
-            maxOut = out;
+        if (out[0] > maxOut) {
+            maxOut = out[0];
             maxPhase = phase;
         }
     } while (std::next_permutation(phase.begin(), phase.end()));
@@ -63,20 +63,22 @@ void ampFeedbackLoop(std::vector<int> & initCode) {
     int maxOut = 0;
     std::vector<int> maxPhase;
 
+    bool stopAtOutput = true;
+
     do {
         std::vector<intCode<int>> amps;
         bool halted = false;
 
         std::vector<int> input(2);
-        int out = 0;
+        std::vector<int> out{0};
 
         // initialize amplifiers until first output
         // after first run of for loop, out is output of amp 5, input for amp 1
         for (size_t i = 0; i < phase.size(); i++) {
-            intCode<int> IC(initCode, true);
+            intCode<int> IC(initCode, stopAtOutput, false, false);
 
             input[0] = phase[i];
-            input[1] = out;
+            input[1] = out[0];
 
             halted = IC.runIntCode(input);
             out = IC.getOutput();
@@ -86,16 +88,19 @@ void ampFeedbackLoop(std::vector<int> & initCode) {
 
         input.resize(1);
 
+        int loop = 0;
         while (!halted) {
             for (size_t i = 0; i < amps.size(); i++) {
-                input[0] = out;
+                input[0] = out[0];
                 halted = amps[i].runIntCode(input);
-                out = amps[i].getOutput();
+                std::vector<int> tempOut = amps[i].getOutput(); // NOTE SEG FAULT
+                out.swap(tempOut);
             }
+            loop++;
         }
 
-        if (out > maxOut) {
-            maxOut = out;
+        if (out[0] > maxOut) {
+            maxOut = out[0];
             maxPhase = phase;
         }
     } while (std::next_permutation(phase.begin(), phase.end()));

@@ -24,13 +24,14 @@ int main() {
     }
 
     bool stopAtOutput = false;
-    bool printOutput = true;
+    bool stopAtInput = false;
+    bool printInOut = true;
 
     {
         std::cout << "\n - - - PART 1 - - - \n";
         std::cout << "-> air con diagnostics code\n";
         std::vector<int> input{1};
-        intCode<int> IC(initCode, stopAtOutput, printOutput);
+        intCode<int> IC(initCode, stopAtOutput, stopAtInput, printInOut);
         IC.runIntCode(input);
     }
 
@@ -38,7 +39,7 @@ int main() {
         std::cout << "\n - - - PART 2 - - - \n";
         std::cout << "-> thermal radiator controller diagnostics code\n";
         std::vector<int> input{5};
-        intCode<int> IC(initCode, stopAtOutput, printOutput);
+        intCode<int> IC(initCode, stopAtOutput, stopAtInput, printInOut);
         IC.runIntCode(input);
     }
 }
