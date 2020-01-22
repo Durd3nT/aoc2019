@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "intCode.hpp"
+#include "../src/intCode.hpp"
 
 
 // ############

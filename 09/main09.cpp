@@ -1,7 +1,7 @@
 #include <fstream>
 #include <algorithm>
 
-#include "intCode.hpp"
+#include "../src/intCode.hpp"
 
 
 template<typename T>

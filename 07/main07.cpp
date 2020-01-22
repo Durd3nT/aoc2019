@@ -1,7 +1,7 @@
 #include <fstream>
 #include <algorithm>
 
-#include "intCode.hpp"
+#include "../src/intCode.hpp"
 
 
 void readData(const std::string & data_path, std::vector<int> & data) {
