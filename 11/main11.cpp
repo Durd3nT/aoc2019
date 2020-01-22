@@ -129,13 +129,7 @@ void writeGridToFile(const std::map<std::vector<int>, bool> & grid,
 {
 	// grid is ordered in increasing order of x coordinate. For each x, it is is
 	// ordered in increasing order of y coordinate.
-	// Transpose grid to write row wise.
 	// -----------------
-
-	std::map<std::vector<int>, bool> gridTranspose;
-	for (const auto & i: grid) {
-		gridTranspose.insert({std::vector<int>{i.first[1], i.first[0]}, i.second});
-	}
 
 	std::string outFilename= "regID.txt";
 	std::ofstream oFile(outFilename);
@@ -146,8 +140,8 @@ void writeGridToFile(const std::map<std::vector<int>, bool> & grid,
 		int x = gridDim[1];
 
 		while (x <= gridDim[2]) {
-			auto point = gridTranspose.find(std::vector<int>{y,x});
-			if (point != gridTranspose.end()) {
+			auto point = grid.find(std::vector<int>{x,y});
+			if (point != grid.end()) {
 				if (point->second) { oFile << "#"; }
 				else { oFile << " "; }
 			} else {
