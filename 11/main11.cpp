@@ -3,7 +3,7 @@
 #include <vector>
 #include <map>
 
-#include "intCode.hpp"
+#include "../src/intCode.hpp"
 
 
 template<typename T>
@@ -33,9 +33,10 @@ parameter of type <signed int>, i.e., int, long, etc.");
 }
 
 
-
 template<typename T>
-void initRobot(const std::vector<T> initCode, std::vector<int> & gridDim)
+void runRobot(const std::vector<T> initCode,
+			  const T initInput,
+			  std::map<std::vector<int>, bool> & grid)
 {
 	// robot moving on grid, robot's instructions (movements) given by intCode
 	// each point on grid can be black or white, the robot with change the
@@ -45,24 +46,21 @@ void initRobot(const std::vector<T> initCode, std::vector<int> & gridDim)
 	//   1 turn 90 degrees right)
 	// --------------------------
 
-    bool stopAtOutput = false;
+	bool stopAtOutput = false;
     bool stopAtInput = true;
     bool printInOut = false;
 
 	intCode<T> IC(initCode, stopAtOutput, stopAtInput, printInOut);
 
-    // all panels start out black, therefore input is 1 at first
-    std::vector<T> input{0};
+    grid.insert({std::vector<int>{0,0}, false});
+	int dir = 0; // in degrees, 0 pointing up, 90 pointing right
+	std::vector<int> gridPos{0,0};
+
+	std::vector<T> input{initInput};
     std::vector<T> output(2);
     bool halted = false;
 
-    // initialize 1x1 grid, false == black, true == white
-    std::map<std::vector<int>, bool> grid;
-    grid.insert({std::vector<int>{0,0}, false});
-    int dir = 0; // in degrees, 0 pointing up, 90 pointing right
-	std::vector<int> gridPos{0,0};
-
-    while (!halted) {
+	while (!halted) {
         halted = IC.runIntCode(input);
         output = IC.getOutput();
 
@@ -101,7 +99,12 @@ void initRobot(const std::vector<T> initCode, std::vector<int> & gridDim)
 		}
 
     } // WHILE: !halted
+}
 
+
+void getGridDim(const std::map<std::vector<int>, bool> & grid,
+				std::vector<int> & gridDim)
+{
 	// compute grid dimensions, i.e., number of painted grid points, and size
 	// of grid both in x- and y-direction
 	int yMax = -(1<<20);
@@ -114,10 +117,96 @@ void initRobot(const std::vector<T> initCode, std::vector<int> & gridDim)
 	}
 
 	gridDim.push_back(grid.size());
-	gridDim.push_back((--grid.end())->first[0] - grid.begin()->first[0]);
-	gridDim.push_back(yMax - yMin);
+	gridDim.push_back(grid.begin()->first[0]);
+	gridDim.push_back((--grid.end())->first[0]);
+	gridDim.push_back(yMin);
+	gridDim.push_back(yMax);
 }
 
+
+void writeGridToFile(const std::map<std::vector<int>, bool> & grid,
+	 				 const std::vector<int> & gridDim)
+{
+	// grid is ordered in increasing order of x coordinate. For each x, it is is
+	// ordered in increasing order of y coordinate.
+	// Transpose grid to write row wise.
+	// -----------------
+
+	std::map<std::vector<int>, bool> gridTranspose;
+	for (const auto & i: grid) {
+		gridTranspose.insert({std::vector<int>{i.first[1], i.first[0]}, i.second});
+	}
+
+	std::string outFilename= "regID.txt";
+	std::ofstream oFile(outFilename);
+
+	int y = gridDim[4];
+
+	while (y >= gridDim[3]) {
+		int x = gridDim[1];
+
+		while (x <= gridDim[2]) {
+			auto point = gridTranspose.find(std::vector<int>{y,x});
+			if (point != gridTranspose.end()) {
+				if (point->second) { oFile << "#"; }
+				else { oFile << " "; }
+			} else {
+				oFile << " ";
+			}
+			x++;
+		} // WHILE: x <= xMax
+		oFile << "\n";
+		y--;
+	} // WHILE: y >= yMin
+
+	oFile.close();
+
+	std::cout << "Painted grid written to file " << outFilename << "\n";
+}
+
+
+template<typename T>
+void initRobot(const std::vector<T> initCode)
+{
+	// initialize robot; first have to determine the dimensions of the grid
+	// the robot is moving on. For this purpose,
+	// - compute the total number of grid points touched by robot (each point
+	//	 only counted once) (gridDim[0])
+	// - min / max grid coordinates in x (gridDim[1] / [2])
+	// - min / max grid coordinates in y (gridDim[3] / [4])
+	// ---------------------
+
+    // all panels start out black, therefore input is 1 at first
+    T initInput = 0;
+
+    // initialize 1x1 grid, false == black, true == white
+    std::map<std::vector<int>, bool> grid;
+
+	runRobot(initCode, initInput, grid);
+
+	std::cout << "Number of painted points is " << grid.size() << "\n";
+}
+
+
+template<typename T>
+void getRegID(const std::vector<T> initCode)
+{
+	// robot expects to start on white panel, all others still black
+	T initInput = 1;
+
+	std::map<std::vector<int>, bool> grid;
+	std::vector<int> gridDim;
+
+	runRobot(initCode, initInput, grid);
+	getGridDim(grid, gridDim);
+
+	writeGridToFile(grid, gridDim);
+}
+
+
+// ############
+// --- MAIN ---
+// ############
 
 int main() {
     std::string data_path = "in11.txt";
@@ -125,9 +214,10 @@ int main() {
 
 	loadData(data_path, initCode);
 
-	std::vector<int> gridDim;
+	std::cout << "\n - - - PART I - - -\n";
 
-    initRobot(initCode, gridDim);
+    initRobot(initCode);
 
-	std::cout << "Number of painted points is " << gridDim[0] << "\n";
+	std::cout << "\n - - - PART II - - -\n";
+	getRegID(initCode);
 }
