@@ -10,6 +10,6 @@ run: main11.exe
 	./main11.exe
 
 clean:
-	rm -v *.exe
+	rm -v *.exe regID.txt
 
 .PHONY: run clean
