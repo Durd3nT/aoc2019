@@ -1,27 +1,13 @@
 #ifndef INTCODE_HPP
 #define INTCODE_HPP
 
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <cassert>
 
-
-const int ADD = 1;
-const int MULTIPLY = 2;
-const int INPUT = 3;
-const int OUTPUT = 4;
-const int JUMPTRUE = 5;
-const int JUMPFALSE = 6;
-const int LESS = 7;
-const int EQUAL = 8;
-const int ADJUSTBASE = 9;
-const int HALT = 99;
-
-const int POSITION = 0;
-const int IMMEDIATE = 1;
-const int RELATIVE = 2;
 
 /*
 An Intcode is a series of instruction sets consisting of two to four integers,
@@ -145,6 +131,22 @@ class intCode {
         void modify7();
         void modify8();
         void modify9();
+
+        // Static Constants
+        static const int ADD = 1;
+        static const int MULTIPLY = 2;
+        static const int INPUT = 3;
+        static const int OUTPUT = 4;
+        static const int JUMPTRUE = 5;
+        static const int JUMPFALSE = 6;
+        static const int LESS = 7;
+        static const int EQUAL = 8;
+        static const int ADJUSTBASE = 9;
+        static const int HALT = 99;
+
+        static const int POSITION = 0;
+        static const int IMMEDIATE = 1;
+        static const int RELATIVE = 2;
 };
 
 
