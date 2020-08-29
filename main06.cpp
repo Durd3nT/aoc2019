@@ -91,7 +91,7 @@ int getOrbitalDist(const std::vector<std::string> & objects, const int dim,
     // o1 and o2 are found in the second half of std::vector objects.
     // NOTE: o1 and o2 may have different distances (numbers of indirect orbits)
     //       between them and the branching at which their two branches join.
-    
+
     std::vector<int> index(2);
     int diff = 0;
     std::string obj1, obj2;
@@ -143,7 +143,7 @@ int getOrbitalDist(const std::vector<std::string> & objects, const int dim,
 // ################
 
 int main() {
-    std::string data_path = "./in06.txt";
+    std::string data_path = "./input_files/in06.txt";
 
     std::vector<std::string> objects;
     int dim = loadData(data_path, objects);

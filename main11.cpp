@@ -3,7 +3,7 @@
 #include <vector>
 #include <map>
 
-#include "../src/intCode.hpp"
+#include "./src/intCode.hpp"
 
 
 template<typename T>
@@ -203,7 +203,7 @@ void getRegID(const std::vector<T> initCode)
 // ############
 
 int main() {
-    std::string data_path = "in11.txt";
+    std::string data_path = "./input_files/in11.txt";
     std::vector<long> initCode;
 
 	loadData(data_path, initCode);

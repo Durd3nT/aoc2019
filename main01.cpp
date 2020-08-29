@@ -36,7 +36,7 @@ void computeFuel(int & massTot, std::vector<int> & modules) {
 int main() {
     std::vector<int> modules;
 
-    std::ifstream inFile("in01.txt");
+    std::ifstream inFile("./input_files/in01.txt");
     if (inFile.is_open()) {
         // see cppreference:
         // default-constructor of istream_iterator is end-of-stream iterator

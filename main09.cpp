@@ -1,7 +1,7 @@
 #include <fstream>
 #include <algorithm>
 
-#include "../src/intCode.hpp"
+#include "./src/intCode.hpp"
 
 
 template<typename T>
@@ -25,7 +25,7 @@ void readData(const std::string & data_path, std::vector<T> & data) {
 
 
 int main() {
-    std::string data_path = "in09.txt";
+    std::string data_path = "./input_files/in09.txt";
     std::vector<long> initCode;
 
     std::vector<long> test0{109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99};

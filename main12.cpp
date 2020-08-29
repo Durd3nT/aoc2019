@@ -163,7 +163,7 @@ void simulate(std::vector<moon<T>> & moons, unsigned Tmax) {
 
 
 int main() {
-    std::string dataPath = "in12.txt";
+    std::string dataPath = "./input_files/in12.txt";
 
     std::vector<moon<int>> moons;
 

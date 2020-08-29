@@ -219,7 +219,7 @@ void vaporizeAsts(const std::vector<std::vector<T>> & coords,
 // ###  MAIN  ###
 // ##############
 int main() {
-    std::string data_path = "in10.txt";
+    std::string data_path = "./input_files/in10.txt";
     std::vector<std::vector<int>> coords;
 
     loadData(data_path, coords);

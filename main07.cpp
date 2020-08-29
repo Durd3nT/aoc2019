@@ -1,7 +1,7 @@
 #include <fstream>
 #include <algorithm>
 
-#include "../src/intCode.hpp"
+#include "./src/intCode.hpp"
 
 
 void readData(const std::string & data_path, std::vector<int> & data) {
@@ -118,7 +118,7 @@ void ampFeedbackLoop(std::vector<int> & initCode) {
 
 
 int main() {
-    std::string data_path = "in07.txt";
+    std::string data_path = "./input_files/in07.txt";
     std::vector<int> initCode;
 
     readData(data_path, initCode);

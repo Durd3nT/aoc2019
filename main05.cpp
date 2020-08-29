@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "../src/intCode.hpp"
+#include "./src/intCode.hpp"
 
 
 // ############
@@ -12,7 +12,7 @@
 // ############
 int main() {
 
-    std::ifstream inFile("in05.txt");
+    std::ifstream inFile("./input_files/in05.txt");
 
     std::vector<int> initCode;
     std::string val;

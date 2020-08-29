@@ -129,7 +129,7 @@ void printImage(const std::vector<int> & finalImage, const int nx, const int ny)
 
 
 int main() {
-    std::string data_path = "in08.txt";
+    std::string data_path = "./input_files/in08.txt";
 
     int nx = 25;
     int ny = 6;
