@@ -1,5 +1,5 @@
-CXX = g++
-CXXFLAGS += -std=c++14
+CXX = g++-9
+CXXFLAGS += -std=c++17
 CXXFLAGS += -Wall -Wextra -Wpedantic
 
 

@@ -2,62 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-
-// --------------------
-// --- Vector CLASS ---
-// --------------------
-// template<typename T>
-// class vec3 {
-//     private:
-//         using value_t = T;
-//         std::vector<value_t> comp;
-//
-//     public:
-//         // ----- SPECIAL MEMBERS -----
-//         vec3() { comp.resize(3); }
-//
-//         vec3(value_t a, value_t b, value_t c) {
-//             comp.resize(3);
-//             comp[0] = a;
-//             comp[1] = b;
-//             comp[2] = c;
-//         }
-//
-//         vec3(const vec3 &) = default;
-//         vec3 & operator=(const vec3 &) = default;
-//
-//         // ----- OPERATORS -----
-//         inline vec3 operator-() const;
-//         inline vec3 & operator+=(const vec3 & v);
-//         inline vec3 & operator-=(const vec3 & v);
-//         inline value_t operator[](int i) const { return comp[i]; }
-//         inline value_t & operator[](int i) { return comp[i]; }
-//
-//         inline size_t size() const { return comp.size(); }
-// };
-//
-// // ----- Operators -----
-// template<typename T>
-// inline vec3<T> vec3<T>::operator-() const {
-//     return vec3(-comp[0], -comp[1], -comp[2]);
-// }
-//
-// template<typename T>
-// inline vec3<T> & vec3<T>::operator+=(const vec3 & v) {
-//     comp[0] += v.comp[0];
-//     comp[1] += v.comp[1];
-//     comp[2] += v.comp[2];
-//     return *this;
-// }
-//
-// template<typename T>
-// inline vec3<T> & vec3<T>::operator-=(const vec3 & v) {
-//     comp[0] -= v.comp[0];
-//     comp[1] -= v.comp[1];
-//     comp[2] -= v.comp[2];
-//     return *this;
-// }
-
+#include <numeric>
 
 
 
@@ -75,12 +20,12 @@ void loadData(const std::string & dataPath, std::vector<moon<T>> & data)
 
     std::string line;
 
-    while(getline(infile, line, '\n')) {
+    while (getline(infile, line, '\n')) {
         moon<T> m;
 
         size_t str_pos = 0;
 
-        while((str_pos = line.find('=', str_pos)) != std::string::npos) {
+        while ((str_pos = line.find('=', str_pos)) != std::string::npos) {
             size_t end = line.find(',', str_pos);
 
             if (end == std::string::npos) {
@@ -155,24 +100,65 @@ void step(std::vector<moon<T>> & moons) {
 
 
 template<typename T>
-void simulate(std::vector<moon<T>> & moons, unsigned Tmax) {
+void simulate(std::vector<moon<T>> & moons, const unsigned Tmax) {
     for (unsigned i = 0; i < Tmax; i++) {
         step(moons);
     }
 }
 
 
+template<typename T>
+long long get_periodicity(std::vector<moon<T>> & moons) {
+    std::vector<std::vector<int>> moons_init_pos;
+    for (const auto & m: moons) {
+        moons_init_pos.push_back(m.pos_);
+    }
+
+    std::vector<bool> coords_periodic(3, false);
+    std::vector<int> coords_periodicity(3, 0);
+
+    unsigned t = 0;
+    while (!coords_periodic[0] || !coords_periodic[1] || !coords_periodic[2]) {
+        step(moons);
+        t++;
+
+        for (size_t k = 0; k < coords_periodic.size(); k++) {
+            if (!coords_periodic[k]) {
+                bool equal = true;
+                for (size_t m = 0; m < moons.size(); m++) {
+                    if (moons[m].pos_[k] != moons_init_pos[m][k]) {
+                        equal = false;
+                        break;
+                    }
+                }
+                if (equal) {
+                    coords_periodicity[k] = t+1;
+                    std::cout << "coord " << k << " periodic at " << t+1 << "\n";
+                    coords_periodic[k] = true;
+                }
+            }
+        }
+    }
+
+    return std::lcm<long long>(std::lcm<long long>(coords_periodicity[0],
+                                                   coords_periodicity[1]),
+                               coords_periodicity[2]);
+}
+
+
 int main() {
     std::string dataPath = "./input_files/in12.txt";
 
-    std::vector<moon<int>> moons;
+    std::vector<moon<int>> moons_init, moons;
 
     // read initial positions
-    loadData(dataPath, moons);
+    loadData(dataPath, moons_init);
 
-    for (auto & i: moons) {
-        i.vel_.resize(3,0);
+    for (auto & m: moons_init) {
+        m.vel_.resize(3,0);
     }
+
+    moons = moons_init;
 
     std::cout << "\n - - - PART I - - -\n";
     unsigned Tmax = 1000;
@@ -181,5 +167,10 @@ int main() {
     int Etot = computeEnergy(moons);
     std::cout << "Total energy of all moons: " << Etot << "\n";
 
+    std::cout << "\n - - - PART II - - -\n";
+    std::vector<moon<int>> moons_periodic = moons_init;
 
+    long long periodicity = get_periodicity(moons_periodic);
+    std::cout << "All moons return to their initial position at time step ";
+    std::cout << periodicity << "\n";
 }
