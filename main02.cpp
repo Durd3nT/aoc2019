@@ -38,9 +38,14 @@ void findInput(const std::vector<int> & initCode,
             if (modCode[0] == desiredOut) {
                 input.push_back(noun);
                 input.push_back(verb);
+                std::cout << "\n - - - PART 2 - - - \n";
                 std::cout << "OUTPUT: " << modCode[0];
-                std::cout << " with input " << 100*noun+verb << "\n";
+                std::cout << " with input (solution) " << 100*noun+verb << "\n";
                 break;
+            }
+            if (noun == 12 && verb == 2) {
+                std::cout << "\n - - - PART 1 - - - \n";
+                std::cout << "Value at position 0: " << modCode[0] << "\n";
             }
         }
     }

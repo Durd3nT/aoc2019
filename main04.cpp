@@ -8,7 +8,7 @@
 // - left to right, digits never DECREASE
 
 
-bool meetCriteria(const int & x) {
+bool meetCriteria(const int & x, const bool two_adjecent_only) {
     std::string xs = std::to_string(x);
 
     // 1) is x 6 digits in length? --------------
@@ -25,17 +25,23 @@ bool meetCriteria(const int & x) {
     bool TWOadjecentEqual = false;
     int adjecentCount = 1;
     for (size_t i = 0; i < xi.size()-1; i++) {
-        if (xi[i] == xi[i+1]) {
-            adjecentCount++;
-            if (i+1 == xi.size()-1 && adjecentCount == 2) {
+        if (two_adjecent_only) {
+            if (xi[i] == xi[i+1]) {
+                adjecentCount++;
+                if (i+1 == xi.size()-1 && adjecentCount == 2) {
+                    TWOadjecentEqual = true;
+                }
+            } else if (adjecentCount == 2) {
+                TWOadjecentEqual = true;
+                adjecentCount = 1;
+            }
+            else if (adjecentCount > 2) { adjecentCount = 1; }
+        } else {
+            if (xi[i] == xi[i+1]) {
+                adjecentCount++;
                 TWOadjecentEqual = true;
             }
-        } else if (adjecentCount == 2) {
-            TWOadjecentEqual = true;
-            adjecentCount = 1;
         }
-        else if (adjecentCount > 2) { adjecentCount = 1; }
-
     }
     if (!TWOadjecentEqual) { return false; }
     // ------------------------------------------
@@ -52,11 +58,13 @@ bool meetCriteria(const int & x) {
 }
 
 
-int findAllPossibilities(const int & min, const int & max) {
+int findAllPossibilities(const int & min, const int & max,
+                         const bool two_adjecent_only)
+{
     int n = 0;
 
     for (int i = min; i <= max; i++) {
-        if (meetCriteria(i)) { n++; }
+        if (meetCriteria(i, two_adjecent_only)) { n++; }
     }
 
     return n;
@@ -64,9 +72,17 @@ int findAllPossibilities(const int & min, const int & max) {
 
 
 int main() {
-    int min = 172851;
-    int max = 675869;
+    int min = 387638; //172851;
+    int max = 919123; //675869;
 
-    int n = findAllPossibilities(min, max);
+    bool two_adjecent_only = false;
+    int n = findAllPossibilities(min, max, two_adjecent_only);
+    std::cout << "\n - - - PART 1 - - - \n";
     std::cout << "There are " << n << " possible passwords\n";
+
+    two_adjecent_only = true;
+    n = findAllPossibilities(min, max, two_adjecent_only);
+
+    std::cout << "\n - - - PART 2 - - - \n";
+    std::cout << "Now, there are only " << n << " possible passwords\n";
 }
