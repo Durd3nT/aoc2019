@@ -6,7 +6,6 @@
 #include "./src/intCode.hpp"
 
 
-enum tile {empty, wall, block, paddle, ball};
 
 template<typename T>
 void loadData(const std::string & data_path, std::vector<T> & data) {
@@ -46,10 +45,8 @@ unsigned get_tile_coords(const std::vector<T> & output,
     for (size_t i = 0; i < output.size(); i+=3) {
         if (output[i+2] == 3) {
             paddle_coords.push_back(output[i]);
-            paddle_coords.push_back(output[i+1]);
         } else if (output[i+2] == 4) {
             ball_coords.push_back(output[i]);
-            ball_coords.push_back(output[i+1]);
         } else if (output[i+2] == 2) {
             count_blocks++;
         }
@@ -100,10 +97,8 @@ T run_arcade(const std::vector<T> & initCode)
         for (size_t i = 0; i < output.size(); i+=3) {
             if (output[i+2] == 3) {
                 paddle_coords[0] = output[i];
-                paddle_coords[1] = output[i+1];
             } else if (output[i+2] == 4) {
                 ball_coords[0] = output[i];
-                ball_coords[1] = output[i+1];
             } else if (output[i] == -1 && output[i+1] == 0) {
                 score = output[i+2];
             }
@@ -137,5 +132,4 @@ int main() {
 
     std::cout << "\n - - - PART II - - -\n";
     std::cout << "Final score: " << final_score << "\n";
-
 }
