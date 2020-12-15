@@ -34,3 +34,4 @@
 
 # OWN ADDS
 test*.txt
+*_old*.cpp

@@ -24,8 +24,8 @@ performed
           size_t pos = 0)
 - Arguments:
     code - int code containing all instruction sets, the program if you want
-    stopAtOutput - false (default): lets runIntCode() continue program execution
-                   after each output instruction
+    stopAtOutput - false (default): lets runIntCode() continue program
+                   execution after each output instruction
                    true: lets runIntCode() return false after each output
                    instruction
     stopAtInput - false (default): lets runIntCode() continue program execution
@@ -37,7 +37,7 @@ performed
                   true: lets runIntCode() print each output that the program
                   generates
     pos - lets runIntCode() start at a position in the program (series of
-          instruction sets) different from 0 (defaul)
+          instruction sets) different from 0 (default)
 
 
 --- FUNCTIONS ---
@@ -58,14 +58,14 @@ performed
   count by the number of integers in each respective set)
 - for each instruction set
     - reads instruction (operation code + parameter modes of all parameters)
-    - sets operation code dependent step size (increment of position count, i.e,
-      where is the next instruction that must be read after this one)
+    - sets operation code dependent step size (increment of position count,
+      i.e, where is the next instruction that must be read after this one)
     - sets all parameter modes AND if the index of any of the parameters to be
-      read lies outside the range of the code size, the function setParaMode()
-      appends as many 0's (zeros) to the code vector as necessary in order to
-      avoid false memory access.
-    - finally executes operation (depending on operation code) on the previously
-      set parameters
+      read lies outside the range of the code size, the function
+      setParameterMode() appends as many 0's (zeros) to the code vector as
+      necessary in order to avoid false memory access.
+    - finally executes operation (depending on operation code) on the
+      previously set parameters
     - OPTIONAL: - program execution stops at output if stopAtOutput_ = true,
                 - program execution stops at input if stopAtInput_ = true AND
                   pos_ is not 0 AND stopped_ = false (set to true when hitting
@@ -121,7 +121,7 @@ class intCode {
 
         // Private Member
         void getParameterMode();
-        void setParaMode(std::vector<T *> &);
+        void setParameterMode(std::vector<T *> &);
         void modify1();
         void modify2();
         void modify3();
@@ -213,9 +213,11 @@ bool intCode<T>::runIntCode(const std::vector<T> & in) {
                 std::cout << "input: " << input_ << "\n";
             }
         } else if (opcode == OUTPUT) {
-            // if stopAtOutput_ only resize lastOut_ if another output
-            // instruction is issued. otherwise, it will be resized at last call
-            // of runIntCode before HALT, erasing the last output.
+            /* if stopAtOutput_ only resize lastOut_ if another output
+               instruction is issued. otherwise, it will be resized at last
+               call of runIntCode before HALT, erasing the last output.
+            */
+            
             if (stopAtOutput_) { lastOut_.resize(0); }
 
             modify4();
@@ -298,7 +300,7 @@ void intCode<T>::getParameterMode() {
 
 
 template<typename T>
-void intCode<T>::setParaMode(std::vector<T *> & params)
+void intCode<T>::setParameterMode(std::vector<T *> & params)
 {
     // set pointers to integers depending on parameter mode
     // - position mode (0)
@@ -311,8 +313,8 @@ void intCode<T>::setParaMode(std::vector<T *> & params)
 
     assert(paraMode_.size() == params.size()+1);
     assert(pos_+1+params.size() > 0 ||
-        *(code_.begin() + pos_+1+params.size()) > 0 ||
-        *(code_.begin() + pos_+1+params.size()) + relBase_ > 0);
+           *(code_.begin() + pos_+1+params.size()) > 0 ||
+           *(code_.begin() + pos_+1+params.size()) + relBase_ > 0);
 
     while (pos_+1+params.size() > code_.size() ||
            unsigned(*(code_.begin() + pos_+1+params.size())) > code_.size() ||
@@ -338,7 +340,7 @@ template<typename T>
 void intCode<T>::modify1()
 {
     std::vector<T *> params(3);
-    setParaMode(params);
+    setParameterMode(params);
 
     *params[2] = (*params[0]) + (*params[1]);
 }
@@ -348,7 +350,7 @@ template<typename T>
 void intCode<T>::modify2()
 {
     std::vector<T *> params(3);
-    setParaMode(params);
+    setParameterMode(params);
 
     *params[2] = (*params[0]) * (*params[1]);
 }
@@ -358,7 +360,7 @@ template<typename T>
 void intCode<T>::modify3()
 {
     std::vector<T *> params(1);
-    setParaMode(params);
+    setParameterMode(params);
 
     *params[0] = input_;
 }
@@ -368,7 +370,7 @@ template<typename T>
 void intCode<T>::modify4()
 {
     std::vector<T *> params(1);
-    setParaMode(params);
+    setParameterMode(params);
 
     lastOut_.push_back(*params[0]);
 }
@@ -378,7 +380,7 @@ template<typename T>
 void intCode<T>::modify5()
 {
     std::vector<T *> params(2);
-    setParaMode(params);
+    setParameterMode(params);
 
     if (*params[0] != 0) { pos_ = *params[1]; }
     else { pos_ += 3; }
@@ -389,7 +391,7 @@ template<typename T>
 void intCode<T>::modify6()
 {
     std::vector<T *> params(2);
-    setParaMode(params);
+    setParameterMode(params);
 
     if (*params[0] == 0) { pos_ = *params[1]; }
     else { pos_ += 3; }
@@ -400,7 +402,7 @@ template<typename T>
 void intCode<T>::modify7()
 {
     std::vector<T *> params(3);
-    setParaMode(params);
+    setParameterMode(params);
 
     if (*params[0] < *params[1]) { *params[2] = 1; }
     else { *params[2] = 0; }
@@ -411,7 +413,7 @@ template<typename T>
 void intCode<T>::modify8()
 {
     std::vector<T *> params(3);
-    setParaMode(params);
+    setParameterMode(params);
 
     if (*params[0] == *params[1]) { *params[2] = 1; }
     else { *params[2] = 0; }
@@ -422,7 +424,7 @@ template<typename T>
 void intCode<T>::modify9()
 {
     std::vector<T *> params(1);
-    setParaMode(params);
+    setParameterMode(params);
 
     relBase_ += *params[0];
 }

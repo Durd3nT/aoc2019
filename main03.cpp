@@ -302,7 +302,7 @@ int main() {
     getGridCoord<segment, wire>(wire_segs, wires);
 
     std::vector<intersection> inters;
-    get_all_intersections(wires, inters);
+    get_all_intersections<wire, intersection>(wires, inters);
 
     unsigned closest = find_closest_intersection(inters);
 
