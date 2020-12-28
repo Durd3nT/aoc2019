@@ -139,6 +139,7 @@ long get_max_fuel(const std::map<std::string, map_si> & reaction_map,
     }
 
     while (ore_count > tot_ore) {
+        reset_leftover(leftover);
         max_fuel -= step;
         ore_count = get_total_ore_req(reaction_map, product_map,
                                       "FUEL", max_fuel, leftover);

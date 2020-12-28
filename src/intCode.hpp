@@ -101,9 +101,11 @@ class intCode {
         size_t getPosition() const { return pos_; }
         std::vector<T> getCode() const { return code_; }
         std::vector<T> getOutput() const { return lastOut_; }
+        T getSingleOutput() const { return lastOut_[0]; }
 
         // Public Member
         bool runIntCode(const std::vector<T> &);
+        bool runIntCode(const T &);
         bool runIntCode();
 
     private:
@@ -210,14 +212,14 @@ bool intCode<T>::runIntCode(const std::vector<T> & in) {
             stopped_ = false;
 
             if (printInOut_) {
-                std::cout << "input: " << input_ << "\n";
+                std::cout << "in: " << input_ << "\n";
             }
         } else if (opcode == OUTPUT) {
             /* if stopAtOutput_ only resize lastOut_ if another output
                instruction is issued. otherwise, it will be resized at last
                call of runIntCode before HALT, erasing the last output.
             */
-            
+
             if (stopAtOutput_) { lastOut_.resize(0); }
 
             modify4();
@@ -258,8 +260,21 @@ bool intCode<T>::runIntCode(const std::vector<T> & in) {
 
 
 template<typename T>
+bool intCode<T>::runIntCode(const T & in) {
+    // Allows for passing of single input as scalar, turns it into vector and
+    // passes it to intCode<T>::runIntCode(const std::vector<T> & in)
+
+	std::vector<T> inVec;
+    inVec.push_back(in);
+    bool res = runIntCode(inVec);
+
+	return res;
+}
+
+
+template<typename T>
 bool intCode<T>::runIntCode() {
-    // default argument for std::vector<T> input, in case no input vector is
+    // Default argument for std::vector<T> input, in case no input vector is
     // provided. Prompts a manual input via std::cin for any input instruction
 
 	std::vector<T> emptyVec;
