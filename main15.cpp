@@ -7,143 +7,27 @@
 
 #include "./src/intCode.hpp"
 
-/* ---------------------------- */
-/* - - - Class Directuion - - - */
-/* ---------------------------- */
-class direction
-{
-public:
-    enum dir_t {invalid = 0, north = 1, south = 2, west = 3, east = 4};
-    direction() : d_(invalid), orig_d_(invalid) {}
-    direction(dir_t d) : d_(d), orig_d_(d) {}
-    direction(unsigned d) {
-        switch(d)
-        {
-            case 1: d_ = north; break;
-            case 2: d_ = south; break;
-            case 3: d_ = west; break;
-            case 4: d_ = east; break;
-            default: std::cout << "ERROR: " << d << " is invalid value\n";
-        }
-        orig_d_ = d_;
-    }
-    direction(const direction & dir) = default;
 
-    unsigned operator()() const { return d_; }
-    direction & operator=(const int rhs);
-    direction & operator=(const direction & rhs);
-    direction & operator++();
-    direction operator++(int);
-    bool operator==(const direction & rhs);
-
-    template<typename T>
-    void move(T & x, T & y);
-    direction get_rev_dir();
-    void try_new_dir();
-
-private:
-    dir_t d_;
-    dir_t orig_d_;
-};
-
-/* - - - MEMBER - - - */
-direction & direction::operator=(const int rhs)
-{
-    if (d_ == rhs){
-        return *this;
-    } else {
-        direction new_dir(rhs);
-        d_ = new_dir.d_;
-        orig_d_ = d_;
-    }
-    return *this;
-}
-
-
-direction & direction::operator=(const direction & rhs)
-{
-    if (this == &rhs) {
-        return *this;
-    } else {
-        d_ = rhs.d_;
-        orig_d_ = d_;
-    }
-    return *this;
-}
-
-
-direction direction::operator++(int)
-{
-    direction tmp = *this;
-    switch (d_)
-    {
-        case north:   d_ = east;  break;
-        case south:   d_ = west;  break;
-        case west:    d_ = north; break;
-        case east:    d_ = south; break;
-        case invalid: std::cout << "Current direction is INVALID\n";
-    }
-    return tmp;
-}
-
-
-bool direction::operator==(const direction & rhs)
-{
-    return (d_ == rhs());
-}
 
 
 template<typename T>
-void direction::move(T & x, T & y)
-{
-    switch (d_)
-    {
-        case north:   y++; break;
-        case south:   y--; break;
-        case west:    x--; break;
-        case east:    x++; break;
-        case invalid: std::cout << "Current direction is INVALID\n";
+std::vector<T> operator+(const std::vector<T> & b, const std::vector<T> & c) {
+    std::vector<T> a;
+    for (size_t i=0; i < b.size(); i++) {
+        a.push_back(b[i] + c[i]);
     }
+
+    return a;
 }
 
-
-direction direction::get_rev_dir()
-{
-    dir_t rev_dir;
-    switch (d_)
-    {
-        case north:   rev_dir = south; break;
-        case south:   rev_dir = north; break;
-        case west:    rev_dir = east;  break;
-        case east:    rev_dir = west;  break;
-        case invalid: std::cout << "Current direction is INVALID\n";
+template<typename T>
+std::vector<T> & operator+=(std::vector<T> & a, const std::vector<T> & b) {
+    for (size_t i=0; i < a.size(); i++) {
+        a[i] += b[i];
     }
-    return rev_dir;
+
+    return a;
 }
-
-
-// void direction::try_new_dir()
-// {
-//     d_++;
-// }
-
-
-
-/* - - - NON-MEMBER - - - */
-std::ostream& operator<<(std::ostream& os, direction dir)
-{
-    switch (dir())
-    {
-        case 0: os << "INVALID"; break;
-        case 1: os << "north";   break;
-        case 2: os << "south";   break;
-        case 3: os << "west";    break;
-        case 4: os << "east";    break;
-        default: os.setstate(std::ios_base::failbit);
-    }
-    return os;
-}
-
 
 
 
@@ -184,64 +68,75 @@ parameter of type <signed int>, i.e., int, long, etc.");
 template <typename T>
 T run_droid(const std::vector<T> & initCode)
 {
-    std::map<std::vector<T>, int> area_map;
-    area_map.insert({std::vector<T>{0,0}, 1});
-    std::vector<std::vector<T>> path;
+    std::map<int, std::vector<int>> dir_to_trans{
+        {1, std::vector<int>{0, 1}},  // north
+        {2, std::vector<int>{0, -1}}, // south
+        {3, std::vector<int>{-1, 0}}, // west
+        {4, std::vector<int>{1, 0}}   // east
+    };
+
+    std::map<int, int> turn_left{
+        {1, 3},
+        {2, 4},
+        {3, 2},
+        {4, 1}
+    };
+
+    std::map<int, int> turn_right{
+        {1, 4},
+        {2, 3},
+        {3, 1},
+        {4, 2}
+    };
+
 
     bool stopAtOutput = true;
     bool stopAtInput = true;
     bool printInOut = false;
 
-    // T input = 1;
-    direction input_dir(1);
+    T input = 1;
     T output;
     bool halted = false;
 
 	intCode<T> IC(initCode, stopAtOutput, stopAtInput, printInOut);
 
     T dist_to_target = 0;
-    T x = 0;
-    T y = 0;
-    std::vector<T> coords(2);
+    std::vector<T> coords{0, 0};
 
-    int j = 0;
+    std::map<std::vector<T>, int> area_map;
+    area_map.insert({std::vector<T>{0,0}, 1});
 
-    while (j<5 && output != 2 && !halted) {
-        direction rev_dir;
-        halted = IC.runIntCode(input_dir());
+
+    while (!halted) {
+        halted = IC.runIntCode(input);
         output = IC.getSingleOutput();
 
-        // if (area_map.find(std::vector<T>{x, y}) != area_map.end()) {
-        //
-        // } else {
-        //
-        // }
+        if (output == 0) {
+            area_map.insert({coords + dir_to_trans[input], output});
 
-        if (output == 1) {
-            input_dir.move(x, y);
-            rev_dir = input_dir.get_rev_dir();
-
-            area_map.insert({std::vector<T>{x, y}, output});
-            path.push_back(std::vector<T>{x, y});
-        } else if (output == 0) {
-            switch (input_dir())
-            {
-                case 1: area_map.insert({std::vector<T>{x, y+1}, output}); break;
-                case 2: area_map.insert({std::vector<T>{x, y-1}, output}); break;
-                case 3: area_map.insert({std::vector<T>{x-1, y}, output}); break;
-                case 4: area_map.insert({std::vector<T>{x+1, y}, output}); break;
+            input = turn_left[input];
+        } else if (output == 1) {
+            coords += dir_to_trans[input];
+            if (area_map.find(coords) != area_map.end()) {
+                dist_to_target--;
+            } else {
+                area_map.insert({coords, output});
+                dist_to_target++;
             }
 
-            input_dir++;
-        }
+            input = turn_right[input];
+        } else if (output == 2) {
+            coords += dir_to_trans[input];
+            area_map.insert({coords, output});
+            dist_to_target++;
 
-        j++;
+            input = turn_right[input];
+            break;
+        }
     }
 
     return dist_to_target;
 }
-
-
 
 
 
@@ -256,12 +151,8 @@ int main() {
 
     loadData(data_path, initCode);
 
-    int final_score = run_droid(initCode);
-    // direction dir1(1);
-    // std::cout << dir1 << "\n";
-    // direction dir2(west);
-    // std::cout << dir1 << " " << dir2 << "   " << "\n";
+    int shortest_dist = run_droid(initCode);
 
     std::cout << "\n - - - PART I - - -\n";
-    // std::cout << "Final score: " << final_score << "\n";
+    std::cout << "Final score: " << shortest_dist << "\n";
 }
